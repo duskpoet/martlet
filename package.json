@@ -1,0 +1,19 @@
+{
+  "name": "martlet",
+  "bin": {
+    "martlet": "src/index.js"
+  },
+  "packageManager": "yarn@1.22.19",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Database migration utility in pure js, supporting only .sql files ",
+  "main": "index.js",
+  "author": "Eduard Dyckman",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test --test-concurrency=1"
+  },
+  "devDependencies": {
+    "testcontainers": "^10.8.1"
+  }
+}

@@ -3,6 +3,7 @@ import { loadAdapter } from "./driver.js";
 import { readdir, readFile } from "node:fs/promises";
 
 export async function doUp(options) {
+  console.log("Doing up with options", options);
   const adapter = await loadAdapter(options.driver);
   await adapter.connect(options.databaseUrl);
   console.log("Connected to database");

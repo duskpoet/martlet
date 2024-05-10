@@ -1,7 +1,7 @@
 {
   "name": "martlet",
   "bin": {
-    "martlet": "src/index.js"
+    "martlet": "./cli.js"
   },
   "packageManager": "yarn@1.22.19",
   "version": "0.0.1",

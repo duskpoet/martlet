@@ -13,6 +13,12 @@
   "scripts": {
     "test": "node --test --test-concurrency=1"
   },
+  "keywords": [
+    "database",
+    "migration",
+    "sql",
+    "postgres"
+  ],
   "devDependencies": {
     "testcontainers": "^10.8.1"
   }

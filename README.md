@@ -6,6 +6,7 @@ Martlet project provides a seamless way to manage database schema versions lever
 
 
 ## Installation
+
 ```bash
 npm i -g martlet
 ```
@@ -15,11 +16,12 @@ yarn global add martlet
 ```
 
 ## Usage
+
 Put migration files in a directory named `migrations` in the root of your project. Files should have the following naming pattern:
 ```
 <version>_<name>.sql
 ```
-Example:
+**Example:**
 ```
 001_create_table.sql
 002_add_column.sql
@@ -27,7 +29,7 @@ Example:
 
 Inside the migration file, you can write SQL statements to create or modify the database schema. The up queries should be separated from the down queries by a `-- up/down --` comment.
 
-Example:
+**Example:**
 ```sql
 create table users (
     id serial primary key,

@@ -30,7 +30,7 @@ const downloadDriver = async (driver) => {
   if (!pkg) {
     throw new Error(`Unknown driver: ${driver}`);
   }
-  spawnSync("npm", ["install", "--no-save", pkg], {
+  spawnSync("npm", ["install", "--no-save", "--legacy-peer-deps", pkg], {
     stdio: "inherit",
   });
 };
@@ -38,6 +38,6 @@ const downloadDriver = async (driver) => {
 export async function loadAdapter(driver) {
   await downloadDriver(driver);
   return import(PACKAGES[driver].split("@")[0]).then(
-    (m) => new PGAdapter(m.default)
+    (m) => new PGAdapter(m.default),
   );
 }

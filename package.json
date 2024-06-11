@@ -4,7 +4,7 @@
     "martlet": "./cli.js"
   },
   "packageManager": "yarn@1.22.19",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "type": "module",
   "description": "Database migration utility in pure js, supporting only .sql files ",
   "main": "src/index.js",

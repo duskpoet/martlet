@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { stat } from "node:fs/promises";
+import { join } from "node:path";
 
 const PACKAGES = {
   pg: "postgres@3.4.4",
@@ -31,14 +32,14 @@ const downloadDriver = async (driver) => {
     throw new Error(`Unknown driver: ${driver}`);
   }
   try {
-    await stat("yarn.lock");
-    const lockfile = await readFile("yarn.lock");
-    const packagejson = await readFile("package.json");
+    await stat(join(process.cwd(), "yarn.lock"));
+    const lockfile = await readFile(join(process.cwd(), "yarn.lock"));
+    const packagejson = await readFile(join(process.cwd(), "package.json"));
     spawnSync("yarn", ["add", pkg], {
       stdio: "inherit",
     });
-    await writeFile("yarn.lock", lockfile);
-    await writeFile("package.json", packagejson);
+    await writeFile(join(process.cwd(), "yarn.lock"), lockfile);
+    await writeFile(join(process.cwd(), "package.json"), packagejson);
     return;
   } catch {}
   spawnSync("npm", ["install", "--no-save", "--legacy-peer-deps", pkg], {

@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { stat } from "node:fs/promises";
+import { stat, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const PACKAGES = {

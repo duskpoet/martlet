@@ -32,9 +32,13 @@ const downloadDriver = async (driver) => {
   }
   try {
     await stat("yarn.lock");
-    spawnSync("yarn", ["add", "--no-save", pkg], {
+    const lockfile = await readFile("yarn.lock");
+    const packagejson = await readFile("package.json");
+    spawnSync("yarn", ["add", pkg], {
       stdio: "inherit",
     });
+    await writeFile("yarn.lock", lockfile);
+    await writeFile("package.json", packagejson);
     return;
   } catch {}
   spawnSync("npm", ["install", "--no-save", "--legacy-peer-deps", pkg], {

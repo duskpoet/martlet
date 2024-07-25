@@ -13,10 +13,6 @@ Martlet project provides a seamless way to manage database schema versions lever
 npm i -g martlet
 ```
 
-```bash
-yarn global add martlet
-```
-
 ## Usage
 
 Put migration files in a directory named `migrations` in the root of your project. Files should have the following naming pattern:
@@ -61,3 +57,6 @@ martlet up --database-url postgres://user:password@localhost:5432/dbname
 martlet down 0 --database-url postgres://user:password@localhost:5432/dbname
 ```
 
+## Reasoning
+Node js ecosystem has many database migration tools, some are independent, some are parts of ORM libraries.
+I needed a simple and minimalistic tool that can just apply migrations written as sql in `.sql` files, and have up and down migrations in a single file, to enable Copilot write down migrations for me :)

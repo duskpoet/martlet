@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./martlet.webp" alt="Martlet" width="100">
+    <img src="https://github.com/duskpoet/martlet/blob/main/martlet.webp" alt="Martlet" width="100">
     <br />
     <em>Migrate your database schema in a simple manner.</em>
 </p>

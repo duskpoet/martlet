@@ -3,32 +3,32 @@
 ## Requirements
 I want to have a database migration tool, that has the following properties:
 1. Every migration is written in a single SQL file, meaning both "up" and "down" parts. This will allow Copilot to fill in the rollback migration. And the fact that it's a bare SQL also makes it the most flexible and supported solution.
-2. Currently applied version should be managed by the tool. I want the tool to be self-sufficient.
-3. I want the tool to support different databases like Postgres, MySQL, SQL Server, etc. So it should be extendable in that sense.
+2. The currently applied version should be managed by the tool. I want the tool to be self-sufficient.
+3. I want the tool to support different databases, such as Postgres, MySQL, SQL Server, etc., so it should be extendable in that sense.
 4. I don't want it to be oversized, so only drivers for the necessary database should be installed, ideally on demand.
-5. I want it to be a part of the javascript ecosystem, since most of the projects I work on are a part of it.
+5. I want it to be part of the javascript ecosystem since most of the projects I work on are a part of it.
 6. Every migration should be performed inside of a transaction.
 
 ## Introduction
-A lot of these points were born from my experience with this awesome tool, called [tern](https://github.com/JackC/tern). I was sad, that javascript doesn't have the same! (Or maybe I suck at googling...). So I decided this could be a nice coding exercise for myself and a story that could be interesting to someone else :)
+A lot of these points were born from my experience with this awesome tool called [tern](https://github.com/JackC/tern). I was sad that javascript doesn't have the same! (Or maybe I suck at googling...). So I decided this could be a nice coding exercise for myself and a story that could be interesting to someone else :)
 
 ## Development
 
 ### Part 1. Designing the tool
 Let's ~~steal~~ design the CLI tool! 
-1. All migrations would have the following naming scheme: `<number>_<name>.sql`, example `001_initial_setup.sql` where number would represent the migration version number.
+1. All migrations would have the following naming scheme: `<number>_<name>.sql`, where the number would represent the migration version number, for example, `001_initial_setup.sql`.
 2. All migrations would reside in a single dir.
-3. Database driver would be downloaded on demand, either some prebundled package or just issuing some sort of `npm install <driver>`.
+3. Database driver would be downloaded on demand, either some pre-bundled package or just issuing some sort of `npm install <driver>`.
 
 So the syntax for the tool would be the following: `martlet up --database-url <url> --driver <driver> --dir <dir>` or `martlet down <version> <same options>`.
 
 Where "up" should apply all migations that are not applied yet and down should rollback to the specified version.
 Options have the following meaning and defaults:
 - **database-url** - connection string for the database, the default would be to lookup the env variable `DATABASE_URL`
-- **driver** - database driver to use. For the first version I will only support postgres with option named "pg".
+- **driver** - database driver to use. For the first version, I will only support Postgres with an option named "pg".
 - **dir** - directory where migrations reside, default is `migrations`
 
-As you can see, I've started with figuring out with how I would invoke the tool before writing any actual code. This is a       good practice, it helps to realize requirements and reduce development cycles.
+As you can see, I've started with figuring out how I would invoke the tool before writing any actual code. This is a good practice, it helps to realize requirements and reduce development cycles.
 
 ### Part 2. Implementation
 
@@ -98,10 +98,10 @@ export function parseOptions(args) {
 }
 ```
 
-As you can see, I don't use any library for parsing, just simply iterating over the arguments list and processing every option. So, if I would have a boolean option, I would shift the iteration index by 1, and if I have an option with a value, I would shift it by 2.
+As you can see, I don't use any library for parsing; I just simply iterate over the arguments list and process every option. So, if I have a boolean option, I would shift the iteration index by 1, and if I have an option with a value, I would shift it by 2.
 
 #### 2.2 Implementing the driver adapter
-To support multiple drivers we need to have some universal interface to access a database, here is how it may look:
+To support multiple drivers, we need to have some universal interface to access a database; here is how it may look:
 ```typescript
 interface Adapter {
     connect(url: string): Promise<void>;
@@ -176,9 +176,9 @@ const downloadDriver = async (driver) => {
 };
 ```
         
-We try to install the driver with yarn at first, but we don't want to generate any diffs in the directory, so we preserve `yarn.lock` and `package.json` files. If yarn is not available, we fallback to npm.
+We try to install the driver with yarn at first, but we don't want to generate any diffs in the directory, so we preserve `yarn.lock` and `package.json` files. If yarn is not available, we will fall back to npm.
 
-When we enured that the driver is installed, we can create an adapter and use it:
+When we ensured that the driver is installed, we can create an adapter and use it:
 ```javascript
 export async function loadAdapter(driver) {
   await downloadDriver(driver);
@@ -205,7 +205,7 @@ const currentVersion = await adapter.transact(async (sql) => {
 console.log(`Current version: ${currentVersion}`);
 ```
 
-Then we read the migrations directory and sort them by version. After that we apply every migration that has version greater than the current one. I will just present the actual migration in the following snippet:
+Then, we read the migrations directory and sort them by version. After that, we apply every migration that has a version greater than the current one. I will just present the actual migration in the following snippet:
 ```javascript
 await adapter.transact(async (sql) => {
     await sql(upMigration);
@@ -220,16 +220,16 @@ The rollback migration is similar, but we sort the migrations in reverse order a
 
 
 ### 3. Testing
-I decided not to use any specific testing framework, but use the built-in nodejs testing capabilities. They include the test runner and the assertion package.
+I decided not to use any specific testing framework but use the built-in nodejs testing capabilities. They include the test runner and the assertion package.
 ```javascript
 import { it, before, after, describe } from "node:test";
 import assert from "node:assert";
 ```
 And to execute tests I would run `node --test --test-concurrency=1`.
 
-Actually, I was writing the code in a sort of TDD manner. I didn't validate that my migrations code work by hand, but I was writing it along with tests. That's why I decided that end-to-end tests would be the best fit for this tool.
-For such an approach, tests would need to bootstrap an empty database, apply some migrations, check that database contents are correct, and then rollback to the initial state and validate that the database is empty.
-To run a database I used the testcontainers library, which provides a nice wrapper around docker.
+Actually, I was writing the code in a sort of TDD manner. I didn't validate that my migrations code worked by hand, but I was writing it along with tests. That's why I decided that end-to-end tests would be the best fit for this tool.
+For such an approach, tests would need to bootstrap an empty database, apply some migrations, check that database contents are correct, and then roll back to the initial state and validate that the database is empty.
+To run a database, I used the "testcontainers" library, which provides a nice wrapper around docker.
 ```javascript
 before(async () => {
     console.log("Starting container");
@@ -244,7 +244,7 @@ after(async () => {
 });
 ```
 
-I wrote some simple migrations and tested that they work as expected. Here is an example of a database state validation:
+I wrote some simple migrations and tested that they worked as expected. Here is an example of a database state validation:
 ```javascript
 const sql = pg(`postgres://postgres:password@localhost:${port}/postgres`);
 const result = await sql`select * from schema_migrations`;
@@ -258,4 +258,4 @@ assert.deepEqual(tables, [
 ```
 
 ### 4. Conclusion
-This was an example of how I would approach the development of a simple CLI tool in the javascript ecosystem. I want to note that modern javascript ecosystem is pretty charged and powerful and I managed to implement the tool with a minimum of external dependencies. I used a postgres driver that would be downloaded on demand and testcontainers for tests. I think that approach gives developers the most flexibility and control over the application.
+This was an example of how I would approach the development of a simple CLI tool in the javascript ecosystem. I want to note that the modern javascript ecosystem is pretty charged and powerful, and I managed to implement the tool with a minimum of external dependencies. I used a postgres driver that would be downloaded on demand and testcontainers for tests. I think that approach gives developers the most flexibility and control over the application.

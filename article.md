@@ -110,7 +110,7 @@ interface Adapter {
 }
 ```
 
-I think `connect` and `close` are pretty obvious functions, let me explain the `transact` method. It should accept a function that would be called with a function that accepts a query text and returns a promise with an intermediate result. This complexity is required to have a general interface that would provide ability to run multiple queries inside of a transaction.
+I think `connect` and `close` are pretty obvious functions, let me explain the `transact` method. It should accept a function that would be called with a function that accepts a query text and returns a promise with an intermediate result. This complexity is required to have a general interface that would provide ability to run multiple queries inside of a transaction. It's easier to grasp by looking at the usage example.
 
 So this is how the adapter looks for the postgres driver:
 ```javascript
@@ -124,9 +124,9 @@ class PGAdapter {
   }
 
   async transact(query) {
-    return this.sql.begin((sql) => {
-      return query((text) => sql.unsafe(text));
-    });
+    return this.sql.begin((sql) => (
+      query((text) => sql.unsafe(text))
+    ));
   }
 
   async close() {
@@ -259,3 +259,8 @@ assert.deepEqual(tables, [
 
 ### 4. Conclusion
 This was an example of how I would approach the development of a simple CLI tool in the javascript ecosystem. I want to note that the modern javascript ecosystem is pretty charged and powerful, and I managed to implement the tool with a minimum of external dependencies. I used a postgres driver that would be downloaded on demand and testcontainers for tests. I think that approach gives developers the most flexibility and control over the application.
+
+### 5. References
+- [martlet repo](https://github.com/duskpoet/martlet)
+- [tern](https://github.com/JackC/tern)
+- [postgres driver](https://github.com/porsager/postgres)

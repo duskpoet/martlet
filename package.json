@@ -3,10 +3,10 @@
   "version": "0.2.0",
   "type": "module",
   "description": "Database migration utility in pure js, supporting only .sql files",
-  "author": "Eduard Dyckman",
+  "author": "Eduard Dykman",
   "license": "MIT",
   "bin": {
-    "martlet": "./cli.js"
+    "martlet": "cli.js"
   },
   "main": "./src/index.js",
   "types": "./src/index.d.ts",

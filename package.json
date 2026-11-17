@@ -1,15 +1,33 @@
 {
   "name": "martlet",
+  "version": "0.2.0",
+  "type": "module",
+  "description": "Database migration utility in pure js, supporting only .sql files",
+  "author": "Eduard Dyckman",
+  "license": "MIT",
   "bin": {
     "martlet": "./cli.js"
   },
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./cli": "./cli.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "cli.js",
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "packageManager": "yarn@1.22.19",
-  "version": "0.1.1",
-  "type": "module",
-  "description": "Database migration utility in pure js, supporting only .sql files ",
-  "main": "src/index.js",
-  "author": "Eduard Dyckman",
-  "license": "MIT",
   "scripts": {
     "test": "node --test --test-concurrency=1"
   },
@@ -19,8 +37,11 @@
     "sql",
     "postgres"
   ],
-  "devDependencies": {
-    "testcontainers": "^10.8.1"
+  "peerDependencies": {
+    "postgres": "^3.4"
   },
-  "dependencies": {}
+  "devDependencies": {
+    "postgres": "^3.4.9",
+    "testcontainers": "^10.8.1"
+  }
 }

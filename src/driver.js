@@ -1,55 +1,29 @@
-import { spawnSync } from "node:child_process";
-import { stat, readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { MartletError } from "./errors.js";
 
-const PACKAGES = {
-  pg: "postgres@3.4.4",
-};
-
-class PGAdapter {
-  constructor(driver) {
-    this.driver = driver;
+/**
+ * Returns the client to run migrations with. A caller-provided `sql` is used
+ * as is and never closed; without one, `postgres` is imported lazily and a
+ * single-connection client is created from `databaseUrl`.
+ */
+export async function openClient({ sql, databaseUrl }) {
+  if (sql) {
+    return { sql, close: async () => {} };
   }
 
-  async connect(url) {
-    this.sql = this.driver(url);
-  }
-
-  async transact(query) {
-    return this.sql.begin((sql) => {
-      return query((text) => sql.unsafe(text));
-    });
-  }
-
-  async close() {
-    await this.sql.end();
-  }
-}
-
-const downloadDriver = async (driver) => {
-  const pkg = PACKAGES[driver];
-  if (!pkg) {
-    throw new Error(`Unknown driver: ${driver}`);
-  }
+  let postgres;
   try {
-    await stat(join(process.cwd(), "yarn.lock"));
-    const lockfile = await readFile(join(process.cwd(), "yarn.lock"));
-    const packagejson = await readFile(join(process.cwd(), "package.json"));
-    spawnSync("yarn", ["add", pkg], {
-      stdio: "inherit",
-    });
-    await writeFile(join(process.cwd(), "yarn.lock"), lockfile);
-    await writeFile(join(process.cwd(), "package.json"), packagejson);
-    return;
-  } catch {}
-  spawnSync("npm", ["install", "--no-save", "--legacy-peer-deps", pkg], {
-    stdio: "inherit",
-  });
-};
+    ({ default: postgres } = await import("postgres"));
+  } catch (err) {
+    if (err?.code === "ERR_MODULE_NOT_FOUND") {
+      throw new MartletError(
+        "driver_missing",
+        'The "postgres" package (^3.4) is required when using databaseUrl. Install it with: npm install postgres',
+        { cause: err },
+      );
+    }
+    throw err;
+  }
 
-export async function loadAdapter(driver) {
-  await downloadDriver(driver);
-  return import(PACKAGES[driver].split("@")[0]).then(
-    (m) => new PGAdapter(m.default),
-  );
+  const client = postgres(databaseUrl, { max: 1, onnotice: () => {} });
+  return { sql: client, close: () => client.end({ timeout: 5 }) };
 }

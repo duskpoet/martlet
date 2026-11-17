@@ -4,13 +4,15 @@
     <em>Migrate your database schema in a simple manner.</em>
 </p>
 
-Martlet project provides a seamless way to manage database schema versions leveraging PostgreSQL (other databases will be added later). Through a CLI interface, users can execute up or down migrations. The software's core functionality lies in applying migrations in a transaction, handling database connections, and dynamically loading the database driver as needed.
+Martlet project provides a seamless way to manage database schema versions leveraging PostgreSQL (other databases will be added later). Through a CLI interface, users can execute up or down migrations. Each migration runs in its own transaction together with its tracking row. Runs are serialised with a Postgres advisory lock, and martlet stops before applying anything if an applied migration was edited or deleted.
 
 
 ## Installation
 
+Requires Node.js 20+. [`postgres`](https://github.com/porsager/postgres) is a peer dependency:
+
 ```bash
-npm i -g martlet
+npm i martlet postgres
 ```
 
 ## Usage
@@ -40,7 +42,7 @@ drop table users;
 ```
 
 ```bash
-martlet --help
+npx martlet --help
 ```
 
 ### Commands
@@ -48,14 +50,39 @@ martlet --help
 #### Up
 
 ```bash
-martlet up --database-url postgres://user:password@localhost:5432/dbname
+npx martlet up --database-url postgres://user:password@localhost:5432/dbname
 ```
 
 #### Down
 
 ```bash
-martlet down 0 --database-url postgres://user:password@localhost:5432/dbname
+npx martlet down 0 --database-url postgres://user:password@localhost:5432/dbname
 ```
+
+Other options: `--dir <dir>` (default `migrations`), `--table <name>` (default `schema_migrations`). `DATABASE_URL` is used when `--database-url` is not given.
+
+### Library
+
+Importing `martlet` has no side effects. Errors are thrown as `MartletError` with a `code` (`checksum_mismatch`, `missing_migration`, `duplicate_version`, `migration_failed`, ...).
+
+```js
+import { resolve } from "node:path";
+import { up, down } from "martlet";
+
+// with an existing postgres.js client (martlet won't close it)
+await up({ sql, dir: resolve("migrations") });
+
+// or with a URL; martlet opens and closes its own connection
+const { from, to, applied } = await up({
+  databaseUrl: process.env.DATABASE_URL,
+  dir: resolve("migrations"),
+  logger: { info: (msg, fields) => console.log(msg, fields) }, // default: silent
+});
+
+await down(0, { sql, dir: resolve("migrations") });
+```
+
+`dir` must be absolute. Only files matching `<number>_<name>.sql` are read; anything else in the directory is ignored.
 
 ## Reasoning
 Node js ecosystem has many database migration tools, some are independent, some are parts of ORM libraries.
